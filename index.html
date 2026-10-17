@@ -21,7 +21,8 @@ button,input,select,textarea{font:inherit;color:inherit}
 .ring{width:64px;height:64px;border-radius:50%;display:grid;place-items:center;background:conic-gradient(var(--a1) var(--p),var(--chip) 0)}
 .ring b{width:50px;height:50px;border-radius:50%;background:var(--bg);display:grid;place-items:center;font-size:13px}
 .bn{background:var(--ac);border-radius:16px;padding:12px 14px;margin-bottom:14px;font-weight:600;color:var(--on)}
-.gt{margin:18px 0 8px;font-weight:700;color:var(--mu)}
+.gt{display:flex;justify-content:space-between;align-items:center;cursor:pointer;padding:8px 4px;margin:12px 0 6px;font-weight:700;color:var(--mu)}
+.ar{font-size:18px;width:30px;height:30px;border-radius:50%;background:var(--chip);display:grid;place-items:center}
 .card{display:flex;gap:12px;align-items:center;background:var(--cd);border-radius:18px;padding:12px;margin-bottom:10px;border-left:6px solid var(--c);box-shadow:0 4px 16px -6px var(--c)}
 .card.done{opacity:.55}.card.done .tt{text-decoration:line-through}
 .chk{flex:none;width:30px;height:30px;border-radius:50%;border:2px solid var(--c);background:none;font-weight:800;color:#3a3050}
@@ -36,9 +37,12 @@ nav button.on{color:var(--tx);font-weight:800}
 #fab{position:fixed;right:18px;bottom:calc(78px + env(safe-area-inset-bottom));width:58px;height:58px;border-radius:50%;border:0;background:var(--ac);font-size:30px;color:var(--on);box-shadow:0 8px 24px color-mix(in srgb,var(--a1) 55%,transparent)}
 #sh{display:none;position:fixed;inset:0;z-index:50}#sh.open{display:block}
 .bd{position:absolute;inset:0;background:#0007}
-.pn{position:absolute;left:0;right:0;bottom:0;max-height:92vh;overflow:auto;background:var(--cd);border-radius:24px 24px 0 0;padding:20px 16px calc(20px + env(safe-area-inset-bottom));animation:up .25s}
+.pn{position:absolute;left:0;right:0;bottom:0;max-height:92vh;overflow:auto;background:var(--cd);border-radius:24px 24px 0 0;padding:0 16px calc(20px + env(safe-area-inset-bottom));animation:up .25s}
 @keyframes up{from{transform:translateY(100%)}}
-.pn h3{margin-bottom:12px}
+.sh-h{display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;background:var(--cd);padding:16px 0 8px;z-index:2}
+.x{width:36px;height:36px;border-radius:50%;border:0;background:var(--chip);font-size:16px;font-weight:700}
+.mr{display:flex;align-items:center;gap:8px;padding:10px 0;border-bottom:1px solid var(--bd)}
+.mr span{flex:1}.mr button{background:var(--chip);border:0;border-radius:10px;width:38px;height:34px}
 label{display:block;font-size:12px;color:var(--mu);margin:10px 0 4px}
 input,select,textarea{width:100%;background:var(--bg);border:1px solid var(--bd);border-radius:12px;padding:11px}
 input[type=color]{height:44px;padding:3px}
@@ -49,7 +53,7 @@ input[type=color]{height:44px;padding:3px}
 .btn{width:100%;border:0;border-radius:14px;padding:13px;background:var(--ac);color:var(--on);font-weight:800;margin-top:14px}
 .btn.g{background:var(--chip);color:var(--tx);margin-top:8px}.btn.r{background:#ffd9e0;color:#b3263f;margin-top:8px}
 .set{background:var(--cd);border-radius:18px;padding:14px;margin-bottom:12px;box-shadow:0 2px 10px -6px var(--tx)}.set p{color:var(--mu);font-size:13px;margin:4px 0 8px}
-.em{text-align:center;color:var(--mu);padding:40px 10px}
+.em{text-align:center;color:var(--mu);padding:30px 10px}
 #ts{position:fixed;top:calc(12px + env(safe-area-inset-top));left:50%;transform:translateX(-50%);background:var(--tx);color:var(--bg);padding:10px 16px;border-radius:14px;font-weight:600;z-index:120;max-width:90%;display:none}
 .cf{position:fixed;z-index:130;pointer-events:none;animation:cf .9s ease-out forwards}
 @keyframes cf{to{transform:translate(var(--dx),var(--dy));opacity:0}}
@@ -64,25 +68,23 @@ input[type=color]{height:44px;padding:3px}
 const K='jingga.v1',$=s=>document.querySelector(s),uid=()=>Math.random().toString(36).slice(2,9);
 const esc=s=>String(s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const cmp=(a,b)=>a.localeCompare(b,'id');
-
-/* ===== DAFTAR DOSEN: edit/tambah nama di sini kapan saja ===== */
-const DAFTAR_DOSEN=[
-"Endah","Endang","Endang Soelistyowati","Dr. Joko Suwito, S.Kp., M.Kes","Nur Hasanah, SKM., M.Kes",
-"Dr. Adin Mu'afiro, S.ST., Ns., M.Kes","Ach. Arfan Adinata, S.Kep., Ns., M.Kep","Hepta Anugrahini, Ns., M.Kep",
-"Purwanti Nurfita","Supriyanto","Dr. Sri Utami, S.Kp., M.Kes","Dr. Yessy Desy Arna, Ns., M.Kep., Sp.Kom"
-];
 const TIPE=['Individu','Kelompok'];
-const JENIS=['Makalah','PPT','Makalah & PPT','UTS/UAS','Resume','Proyek','LKS','Lainnya'];
-const DEF=[['Patient Safety','🛡️','#f9a8c9'],['Metodologi Penelitian','📖','#c4b5fd'],['Biostatistik','📊','#a5c8ff'],['PKKB','🚑','#ffc9a8'],['Promosi Kesehatan','🌱','#9fe3d0'],['Evidence Based Nursing','📚','#f4b6e6'],['Keperawatan Komunitas','🏘️','#fbe38e'],['Interprofesional Education','🤝','#b6e3ff'],['Praktikum Komunitas','🩺','#b8e0a8']];
+const JENIS_DEF=['Makalah','PPT','Makalah & PPT','UTS/UAS','Resume','Proyek','LKS'];
+const PAL=['#f9a8c9','#c4b5fd','#a5c8ff','#ffc9a8','#9fe3d0','#f4b6e6','#fbe38e','#b6e3ff','#b8e0a8'];
+const DEF=[['Patient Safety','🛡️'],['Metodologi Penelitian','📖'],['Biostatistik','📊'],['PKKB','🚑'],['Promosi Kesehatan','🌱'],['Evidence Based Nursing','📚'],['Keperawatan Komunitas','🏘️'],['Interprofesional Education','🤝'],['Praktikum Komunitas','🩺']];
+const LBL={c:'Mata Kuliah',dosen:'Dosen',jenis:'Jenis Tugas'};
 const TH={light:{bg:'#fff4f8',cd:'#ffffff',tx:'#473d63',a1:'#ff9fc5',a2:'#8fc3ff'},dark:{bg:'#15121f',cd:'#221e33',tx:'#f3effa',a1:'#f7a8d0',a2:'#8cbcff'}};
 const lum=h=>{const n=parseInt(h.slice(1),16),f=v=>{v/=255;return v<=.03928?v/12.92:Math.pow((v+.055)/1.055,2.4)};return .2126*f(n>>16)+.7152*f(n>>8&255)+.0722*f(n&255)};
 
 let S;try{S=JSON.parse(localStorage.getItem(K))}catch(e){}
-if(!S||!S.courses)S={v:2,courses:DEF.map(d=>({id:uid(),name:d[0],emoji:d[1],color:d[2]})),tasks:[]};
+if(!S||!S.courses)S={v:3,courses:DEF.map((d,i)=>({id:uid(),name:d[0],emoji:d[1],color:PAL[i]})),tasks:[]};
 function mig(){
- if(!S.v){S.courses.forEach(c=>{const d=DEF.find(x=>x[0]==c.name);if(d)c.color=d[2]});S.v=2}
- S.tasks.forEach(t=>{if(!t.tipe){t.tipe=t.type=='Kelompok'?'Kelompok':'Individu';t.jenis=JENIS.includes(t.type)?t.type:''}});
+ S.tasks.forEach(t=>{if(!t.tipe){t.tipe=t.type=='Kelompok'?'Kelompok':'Individu';t.jenis=JENIS_DEF.includes(t.type)?t.type:''}});
  if(!S.theme)S.theme={mode:'light',custom:{...TH.light}};
+ if(!S.dosen){S.dosen=S.dosenExtra||[];delete S.dosenExtra}
+ if(!S.jenis)S.jenis=[...JENIS_DEF];
+ if(!S.col)S.col={};
+ S.v=3;
 }
 mig();
 const save=()=>localStorage.setItem(K,JSON.stringify(S));
@@ -95,74 +97,113 @@ function applyTheme(){
  document.querySelector('meta[name=theme-color]').content=c.bg;
 }
 applyTheme();
-let tab='t',F;
+let tab='t',F={},MB='closeS()';
 const fmt=d=>d.toLocaleString('id-ID',{weekday:'short',day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
 const rl=m=>(m%1440==0?'H-'+m/1440:m%60==0?m/60+' jam':m+' mnt')+(m%1440==0?'':' sebelum');
 const crs=id=>S.courses.find(c=>c.id==id)||{name:'(Mata Kuliah dihapus)',emoji:'📌',color:'#bbb'};
 const sortedC=()=>[...S.courses].sort((a,b)=>cmp(a.name,b.name));
-const allDosen=()=>[...new Set([...DAFTAR_DOSEN,...(S.dosenExtra||[])])].sort(cmp);
-const dosenOpts=sel=>`<option value="">— Belum dipilih —</option>`+allDosen().map(d=>`<option ${d==sel?'selected':''}>${esc(d)}</option>`).join('')+`<option value="__new">➕ Tambah dosen baru…</option>`;
+const LD=()=>[...S.dosen].sort(cmp);
 function toast(m){const t=$('#ts');t.textContent=m;t.style.display='block';clearTimeout(toast.h);toast.h=setTimeout(()=>t.style.display='none',3500)}
 function go(t){tab=t;render();scrollTo(0,0)}
+
+/* ===== TAMPILAN TUGAS ===== */
 function card(t){const c=crs(t.cid),d=new Date(t.due),late=!t.done&&d<Date.now();
 return `<div class="card ${t.done?'done':''} ${late?'late':''}" style="--c:${c.color}"><button class="chk" onclick="tog('${t.id}',event)">${t.done?'✓':''}</button><div class="body" onclick="openTask('${t.id}')"><div class="mk">${c.emoji} ${esc(c.name)}</div><div class="tt">${esc(t.title)}</div><div class="dt">${esc(t.tipe)}${t.jenis?' • '+esc(t.jenis):''}</div><div class="dt">⏰ ${fmt(d)}${t.old?` (awal: ${fmt(new Date(t.old))})`:''}</div>${t.dosen?`<div class="dt">👩‍🏫 ${esc(t.dosen)}</div>`:''}</div><div class="ic">${t.link?`<button onclick="window.open('${esc(t.link)}','_blank')">🔗</button>`:''}<button onclick="gcal('${t.id}')">📅</button></div></div>`}
+const isCol=k=>S.col[k]===undefined?k=='done':S.col[k];
+function tg(k){S.col[k]=!isCol(k);save();render()}
 function vTasks(){const n=new Date(),eT=new Date(n);eT.setHours(23,59,59,999);const wk=+eT+6048e5;
-const g={'🔥 Terlambat':[],'📍 Hari ini':[],'📅 Minggu ini':[],'🌙 Nanti':[]},dn=[];
+const g={late:[],today:[],week:[],later:[],done:[]};
 [...S.tasks].sort((a,b)=>new Date(a.due)-new Date(b.due)).forEach(t=>{const d=+new Date(t.due);
-if(t.done)dn.unshift(t);else if(d<n)g['🔥 Terlambat'].push(t);else if(d<=eT)g['📍 Hari ini'].push(t);else if(d<=wk)g['📅 Minggu ini'].push(t);else g['🌙 Nanti'].push(t)});
-const tot=S.tasks.length,p=tot?Math.round(dn.length/tot*100):0,u=g['🔥 Terlambat'].length+g['📍 Hari ini'].length;
-let h=`<div class="hd"><div><h2>Halo, Jingga 👋</h2><p>${tot-dn.length} tugas belum selesai</p></div><div class="ring" style="--p:${p}%"><b>${p}%</b></div></div>`;
+if(t.done)g.done.unshift(t);else if(d<n)g.late.push(t);else if(d<=eT)g.today.push(t);else if(d<=wk)g.week.push(t);else g.later.push(t)});
+const L={late:'🔥 Terlambat',today:'📍 Hari ini',week:'📅 Minggu ini',later:'🌙 Nanti',done:'✅ Selesai'};
+const tot=S.tasks.length,p=tot?Math.round(g.done.length/tot*100):0,u=g.late.length+g.today.length;
+let h=`<div class="hd"><div><h2>Halo, Jingga 👋</h2><p>${tot-g.done.length} tugas belum selesai</p></div><div class="ring" style="--p:${p}%"><b>${p}%</b></div></div>`;
 if(u)h+=`<div class="bn">⚡ ${u} tugas perlu perhatian hari ini</div>`;
 if(!tot)return h+`<div class="em">Belum ada tugas.<br>Ketuk tombol <b>+</b> untuk menambah tugas pertama.</div>`;
-for(const k in g)if(g[k].length)h+=`<div class="gt">${k} (${g[k].length})</div>`+g[k].map(card).join('');
-if(dn.length)h+=`<div class="gt">✅ Selesai (${dn.length})</div>`+dn.slice(0,15).map(card).join('');
+for(const k in g)if(g[k].length){const c=isCol(k);h+=`<div class="gt" onclick="tg('${k}')"><span>${L[k]} (${g[k].length})</span><span class="ar">${c?'▸':'▾'}</span></div>`+(c?'':g[k].map(card).join(''))}
 return h}
-function vCourses(){return `<div class="hd"><div><h2>Mata Kuliah</h2><p>Atur sekali, pakai terus</p></div></div>`+sortedC().map(c=>`<div class="card" style="--c:${c.color}" onclick="openCourse('${c.id}')"><div style="font-size:26px">${c.emoji}</div><div class="body"><div class="tt">${esc(c.name)}</div><div class="dt">${S.tasks.filter(t=>t.cid==c.id).length} tugas</div></div></div>`).join('')}
+function vCourses(){return `<div class="hd"><div><h2>Mata Kuliah</h2><p>Semangat!</p></div></div>`+sortedC().map(c=>`<div class="card" style="--c:${c.color}" onclick="openCourse('${c.id}')"><div style="font-size:26px">${c.emoji}</div><div class="body"><div class="tt">${esc(c.name)}</div><div class="dt">${S.tasks.filter(t=>t.cid==c.id).length} tugas</div></div></div>`).join('')}
 function vSet(){const np=window.Notification?Notification.permission:'tidak didukung',m=S.theme.mode,cu=S.theme.custom;
 const pk=(k,l)=>`<div><label>${l}</label><input type="color" value="${cu[k]}" oninput="setC('${k}',this.value)"></div>`;
 return `<div class="hd"><div><h2>Pengaturan</h2></div></div>
 <div class="set"><b>🎨 Tema</b><div class="chs" style="margin-top:8px">${[['light','☀️ Terang'],['dark','🌙 Gelap'],['custom','🎛️ Custom']].map(a=>`<button class="ch ${m==a[0]?'on':''}" onclick="setTheme('${a[0]}')">${a[1]}</button>`).join('')}</div>${m=='custom'?`<div class="g2" style="margin-top:6px">${pk('bg','Warna latar')}${pk('cd','Warna kartu')}${pk('a1','Aksen 1')}${pk('a2','Aksen 2')}</div>`:''}</div>
+<div class="set"><b>🗂️ Kelola Daftar</b><p>Tambah, ubah nama, atau hapus pilihan di dropdown.</p><button class="btn g" style="margin-top:0" onclick="manage('c','closeS()')">Mata Kuliah</button><button class="btn g" onclick="manage('dosen','closeS()')">Dosen</button><button class="btn g" onclick="manage('jenis','closeS()')">Jenis Tugas</button></div>
 <div class="set"><b>🔔 Notifikasi</b><p>Status: ${np}. Pengingat berbunyi saat aplikasi aktif/baru dibuka. Untuk tugas penting, pakai tombol 📅 (Google Calendar) agar pasti berbunyi.</p><button class="btn g" onclick="askN()">Izinkan notifikasi</button></div>
 <div class="set"><b>💾 Backup</b><p>Simpan file backup ke Google Drive/WA. Dipakai kalau ganti HP.</p><button class="btn" onclick="exp()">Simpan backup</button><button class="btn g" onclick="$('#im').click()">Pulihkan dari file</button><input type="file" id="im" accept=".json" hidden onchange="imp(event)"></div>
 <div class="set"><b>🔋 Tips Samsung</b><p>Pengaturan HP → Aplikasi → Jingga → Baterai → pilih "Tidak dibatasi".</p></div>
-<div class="set"><button class="btn r" onclick="if(confirm('Hapus SEMUA data?')){localStorage.removeItem(K);location.reload()}">Hapus semua data</button></div>`}
+<div class="set"><button class="btn r" style="margin-top:0" onclick="if(confirm('Hapus SEMUA data?')){localStorage.removeItem(K);location.reload()}">Hapus semua data</button></div>`}
 function setTheme(m){if(m=='custom'&&!S.theme.touched)S.theme.custom={...(TH[S.theme.mode]||TH.light)};S.theme.mode=m;save();applyTheme();render()}
 function setC(k,v){S.theme.custom[k]=v;S.theme.touched=1;save();applyTheme()}
 function render(){$('#app').innerHTML=tab=='t'?vTasks():tab=='c'?vCourses():vSet();document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('on',b.dataset.t==tab));$('#fab').style.display=tab=='s'?'none':''}
-function sheet(h){$('#sh').innerHTML='<div class="bd" onclick="closeS()"></div><div class="pn">'+h+'</div>';$('#sh').className='open'}
-function closeS(){$('#sh').className=''}
+
+/* ===== PANEL (dengan tombol silang ✕) ===== */
+function sheet(title,h,back){const o=$('#sh');if(o.className!='open')history.pushState({s:1},'');
+ o.innerHTML=`<div class="bd" onclick="closeS()"></div><div class="pn"><div class="sh-h"><h3>${title}</h3><button class="x" onclick="${back||'closeS()'}">✕</button></div>${h}</div>`;o.className='open'}
+function closeS(){const o=$('#sh');if(o.className!='open')return;o.className='';if(history.state&&history.state.s)history.back()}
+addEventListener('popstate',()=>{$('#sh').className=''});
+
 function tog(id,ev){ev.stopPropagation();const t=S.tasks.find(x=>x.id==id);t.done=!t.done;save();if(t.done)pop(ev.clientX,ev.clientY);render()}
 function pop(x,y){for(let i=0;i<12;i++){const s=document.createElement('span');s.className='cf';s.textContent=['🎉','✨','🌸','⭐'][i%4];s.style.cssText=`left:${x}px;top:${y}px;--dx:${(Math.random()-.5)*220}px;--dy:${-60-Math.random()*130}px`;document.body.appendChild(s);setTimeout(()=>s.remove(),900)}}
-function openTask(id){const t=id?S.tasks.find(x=>x.id==id):null,d=new Date(Date.now()+864e5);d.setHours(23,59,0,0);
+
+/* ===== FORM TUGAS ===== */
+const SP='<option value="__new">➕ Tambah baru…</option><option value="__mg">⚙️ Kelola daftar…</option>';
+function opts(arr,sel,ph){const a=sel&&!arr.includes(sel)?[...arr,sel]:arr;return `<option value="">${ph}</option>`+a.map(x=>`<option ${x==sel?'selected':''}>${esc(x)}</option>`).join('')+SP}
+function openTask(id){const t=id?S.tasks.find(x=>x.id==id):null,d=new Date(Date.now()+864e5);
 const pad=n=>String(n).padStart(2,'0'),loc=`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T23:59`;
-F=t?{...t,rem:[...t.rem]}:{id:null,cid:(sortedC()[0]||{}).id,title:'',due:loc,link:'',tipe:'Individu',jenis:'',dosen:'',note:'',rem:[1440,180]};
-sheet(`<h3>${t?'Edit tugas':'Tugas baru'}</h3><label>Mata Kuliah</label><select id="f_cid">${sortedC().map(c=>`<option value="${c.id}" ${c.id==F.cid?'selected':''}>${c.emoji} ${esc(c.name)}</option>`).join('')}</select>
-<label>Dosen</label><select id="f_dosen" onchange="dosenSel(this)">${dosenOpts(F.dosen)}</select>
+F=t?{...t,rem:[...t.rem]}:{id:null,cid:'',title:'',due:loc,link:'',tipe:'Individu',jenis:'',dosen:'',note:'',rem:[1440,180]};
+renderTaskForm()}
+function renderTaskForm(){
+sheet(F.id?'Edit tugas':'Tugas baru',`<label>Mata Kuliah</label><select id="f_cid" onchange="sp(this,'c')"><option value="">— Pilih Mata Kuliah —</option>${sortedC().map(c=>`<option value="${c.id}" ${c.id==F.cid?'selected':''}>${c.emoji} ${esc(c.name)}</option>`).join('')}${SP}</select>
+<label>Dosen</label><select id="f_dosen" onchange="sp(this,'dosen')">${opts(LD(),F.dosen,'— Belum dipilih —')}</select>
 <label>Judul tugas</label><input id="f_title" value="${esc(F.title)}" placeholder="mis. LKS Uji Normalitas">
-<label>Deadline ${t?'(ubah tanggal = otomatis tercatat sebagai extend)':''}</label><input type="datetime-local" id="f_due" value="${F.due}">
+<label>Deadline ${F.id?'(ubah tanggal = otomatis tercatat sebagai extend)':''}</label><input type="datetime-local" id="f_due" value="${F.due}">
 <div class="g2"><div><label>Tipe</label><select id="f_tipe">${TIPE.map(x=>`<option ${x==F.tipe?'selected':''}>${x}</option>`).join('')}</select></div>
-<div><label>Jenis Tugas</label><select id="f_jenis"><option value="">— Pilih —</option>${JENIS.map(x=>`<option ${x==F.jenis?'selected':''}>${esc(x)}</option>`).join('')}</select></div></div>
+<div><label>Jenis Tugas</label><select id="f_jenis" onchange="sp(this,'jenis')">${opts(S.jenis,F.jenis,'— Pilih —')}</select></div></div>
 <label>Link Google Drive</label><input id="f_link" value="${esc(F.link)}" placeholder="https://drive.google.com/...">
 <label>Catatan</label><textarea id="f_note" rows="2">${esc(F.note)}</textarea>
 <label>Pengingat</label><div class="chs" id="rc"></div>
 <div class="row" style="margin-top:8px"><input type="number" id="cn" min="1" placeholder="angka"><select id="cu"><option value="60">jam</option><option value="1440">hari</option><option value="1">menit</option></select><button class="ch" onclick="addR()">+ Tambah</button></div>
-<button class="btn" onclick="saveTask()">Simpan</button>${t?`<button class="btn g" onclick="gcal('${t.id}')">📅 Tambah ke Google Calendar</button><button class="btn r" onclick="delTask('${t.id}')">Hapus tugas</button>`:''}`);rc()}
-function dosenSel(el){if(el.value!='__new')return;const n=(prompt('Nama dosen:')||'').trim();if(!n){el.innerHTML=dosenOpts(F.dosen);return}
-S.dosenExtra=S.dosenExtra||[];if(!allDosen().includes(n))S.dosenExtra.push(n);save();F.dosen=n;el.innerHTML=dosenOpts(n)}
+<button class="btn" onclick="saveTask()">Simpan</button>${F.id?`<button class="btn g" onclick="gcal('${F.id}')">📅 Tambah ke Google Calendar</button><button class="btn r" onclick="delTask('${F.id}')">Hapus tugas</button>`:''}`);rc()}
+function readForm(){['cid','dosen','title','due','link','tipe','jenis','note'].forEach(k=>{const e=$('#f_'+k);if(e&&!e.value.startsWith('__'))F[k]=e.value})}
+function sp(el,k){const a=el.value;if(a!='__new'&&a!='__mg')return;readForm();
+ if(a=='__mg')return manage(k,'renderTaskForm()');
+ const n=(prompt('Nama '+LBL[k]+' baru:')||'').trim();if(n){const r=addItem(k,n);F[k=='c'?'cid':k]=r;save()}
+ renderTaskForm()}
 function rc(){const all=[...new Set([4320,2880,1440,180,60,...F.rem])].sort((a,b)=>b-a);$('#rc').innerHTML=all.map(m=>`<button class="ch ${F.rem.includes(m)?'on':''}" onclick="tr(${m})">${rl(m)}</button>`).join('')}
 function tr(m){F.rem=F.rem.includes(m)?F.rem.filter(x=>x!=m):[...F.rem,m];rc()}
 function addR(){const n=+$('#cn').value,m=Math.round(n*$('#cu').value);if(!n||m<1)return;if(!F.rem.includes(m))F.rem.push(m);$('#cn').value='';rc()}
-function saveTask(){const v=k=>$('#f_'+k).value;if(!v('title').trim()||!v('due')||!v('cid'))return toast('Isi Mata Kuliah, judul, dan deadline dulu ya');
-const o={cid:v('cid'),dosen:v('dosen')=='__new'?'':v('dosen'),title:v('title').trim(),due:v('due'),link:v('link').trim(),tipe:v('tipe'),jenis:v('jenis'),note:v('note').trim(),rem:F.rem};
+function saveTask(){readForm();if(!F.cid||!F.title.trim()||!F.due)return toast('Pilih Mata Kuliah, isi judul, dan deadline dulu ya');
+const o={cid:F.cid,dosen:F.dosen,title:F.title.trim(),due:F.due,link:F.link.trim(),tipe:F.tipe,jenis:F.jenis,note:F.note.trim(),rem:F.rem};
 const pf=()=>o.rem.filter(r=>new Date(o.due)-r*6e4<=Date.now());
 if(F.id){const t=S.tasks.find(x=>x.id==F.id);if(t.due!=o.due){t.old=t.old||t.due;o.fired=pf()}Object.assign(t,o)}else S.tasks.push({id:uid(),done:false,fired:pf(),...o});
 save();closeS();render();check()}
 function delTask(id){if(confirm('Hapus tugas ini?')){S.tasks=S.tasks.filter(x=>x.id!=id);save();closeS();render()}}
-function openCourse(id){const c=id?S.courses.find(x=>x.id==id):{emoji:'📘',color:'#f9a8c9',name:''};
-sheet(`<h3>${id?'Edit Mata Kuliah':'Mata Kuliah baru'}</h3><div class="row"><div><label>Emoji</label><input id="c_e" value="${c.emoji}"></div><div><label>Warna</label><input type="color" id="c_c" value="${c.color}"></div></div><label>Nama Mata Kuliah</label><input id="c_n" value="${esc(c.name)}"><button class="btn" onclick="saveCourse('${id||''}')">Simpan</button>${id?`<button class="btn r" onclick="delCourse('${id}')">Hapus Mata Kuliah</button>`:''}`)}
+
+/* ===== KELOLA DAFTAR (Mata Kuliah / Dosen / Jenis Tugas) ===== */
+const keys=k=>k=='c'?sortedC().map(c=>c.id):k=='dosen'?LD():S.jenis;
+const lab=(k,x)=>k=='c'?crs(x).emoji+' '+crs(x).name:x;
+function addItem(k,n){if(k=='c'){const id=uid();S.courses.push({id,name:n,emoji:'📘',color:PAL[S.courses.length%PAL.length]});return id}
+ if(!S[k].includes(n))S[k].push(n);return n}
+function manage(k,back){if(back)MB=back;const ks=keys(k);
+sheet('Kelola '+LBL[k],(ks.length?ks.map((x,i)=>`<div class="mr"><span>${esc(lab(k,x))}</span><button onclick="mgRen('${k}',${i})">✏️</button><button onclick="mgDel('${k}',${i})">🗑️</button></div>`).join(''):`<div class="em">Belum ada ${LBL[k]}.</div>`)+`<button class="btn" onclick="mgAdd('${k}')">➕ Tambah ${LBL[k]}</button><button class="btn g" onclick="${MB}">Selesai</button>`,MB)}
+function mgAdd(k){const n=(prompt('Nama '+LBL[k]+' baru:')||'').trim();if(!n)return;addItem(k,n);save();manage(k);render()}
+function mgRen(k,i){const x=keys(k)[i],old=k=='c'?crs(x).name:x,n=(prompt('Ubah nama:',old)||'').trim();if(!n||n==old)return;
+ if(k=='c')S.courses.find(c=>c.id==x).name=n;
+ else{const j=S[k].indexOf(x);S[k][j]=n;S.tasks.forEach(t=>{if(t[k]==x)t[k]=n});if(F[k]==x)F[k]=n}
+ save();manage(k);render()}
+function mgDel(k,i){const x=keys(k)[i];
+ if(k=='c'){if(S.tasks.some(t=>t.cid==x))return toast('Mata Kuliah ini masih punya tugas. Hapus tugasnya dulu.');if(!confirm('Hapus "'+crs(x).name+'"?'))return;S.courses=S.courses.filter(c=>c.id!=x);if(F.cid==x)F.cid=''}
+ else{if(!confirm('Hapus "'+x+'" dari daftar? Tugas lama tetap menyimpan namanya.'))return;S[k]=S[k].filter(y=>y!=x);if(F[k]==x)F[k]=''}
+ save();manage(k);render()}
+
+/* ===== FORM MATA KULIAH ===== */
+function openCourse(id){const c=id?S.courses.find(x=>x.id==id):{emoji:'📘',color:PAL[S.courses.length%PAL.length],name:''};
+sheet(id?'Edit Mata Kuliah':'Mata Kuliah baru',`<div class="row"><div><label>Emoji</label><input id="c_e" value="${c.emoji}"></div><div><label>Warna</label><input type="color" id="c_c" value="${c.color}"></div></div><label>Nama Mata Kuliah</label><input id="c_n" value="${esc(c.name)}"><button class="btn" onclick="saveCourse('${id||''}')">Simpan</button>${id?`<button class="btn r" onclick="delCourse('${id}')">Hapus Mata Kuliah</button>`:''}`)}
 function saveCourse(id){const o={emoji:$('#c_e').value||'📘',color:$('#c_c').value,name:$('#c_n').value.trim()};if(!o.name)return toast('Nama Mata Kuliah wajib diisi');
 if(id)Object.assign(S.courses.find(x=>x.id==id),o);else S.courses.push({id:uid(),...o});save();closeS();render()}
 function delCourse(id){if(S.tasks.some(t=>t.cid==id))return toast('Mata Kuliah ini masih punya tugas. Hapus tugasnya dulu.');if(confirm('Hapus Mata Kuliah ini?')){S.courses=S.courses.filter(c=>c.id!=id);save();closeS();render()}}
+
+/* ===== KALENDER, BACKUP, NOTIFIKASI ===== */
 function gcal(id){const t=S.tasks.find(x=>x.id==id),c=crs(t.cid),s=new Date(t.due),e=new Date(+s+18e5),z=d=>d.toISOString().replace(/[-:]|\.\d+/g,'');
 window.open('https://calendar.google.com/calendar/render?action=TEMPLATE&text='+encodeURIComponent(c.emoji+' '+t.title)+'&dates='+z(s)+'/'+z(e)+'&details='+encodeURIComponent(c.name+(t.dosen?'\n'+t.dosen:'')+(t.link?'\n'+t.link:'')),'_blank')}
 function exp(){const b=new Blob([JSON.stringify(S)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='jingga-backup-'+new Date().toISOString().slice(0,10)+'.json';a.click();toast('Backup disimpan ✅')}
