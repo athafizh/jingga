@@ -16,7 +16,7 @@ button,input,select,textarea{font:inherit;color:inherit}
 #sp p{color:var(--mu);margin-top:6px;animation:fl 2s .3s ease both}
 @keyframes fl{0%{opacity:0;transform:scale(.8);background-position:0}60%{opacity:1}100%{opacity:1;transform:none;background-position:100%}}
 .wrap{padding:18px 16px;max-width:560px;margin:auto}
-.hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.hd{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
 .hd h2{font-size:26px;font-weight:800}.hd p{color:var(--mu)}
 .ring{width:64px;height:64px;border-radius:50%;display:grid;place-items:center;background:conic-gradient(var(--a1) var(--p),var(--chip) 0)}
 .ring b{width:50px;height:50px;border-radius:50%;background:var(--bg);display:grid;place-items:center;font-size:13px}
@@ -54,6 +54,9 @@ input[type=color]{height:44px;padding:3px}
 .btn.g{background:var(--chip);color:var(--tx);margin-top:8px}.btn.r{background:#ffd9e0;color:#b3263f;margin-top:8px}
 .set{background:var(--cd);border-radius:18px;padding:14px;margin-bottom:12px;box-shadow:0 2px 10px -6px var(--tx)}.set p{color:var(--mu);font-size:13px;margin:4px 0 8px}
 .em{text-align:center;color:var(--mu);padding:30px 10px}
+#lg{display:none;position:fixed;inset:0;z-index:90;background:var(--bg);flex-direction:column;align-items:center;justify-content:center;padding:24px;text-align:center}
+#lg h1{font-size:56px;font-weight:800;letter-spacing:-2px;background:var(--ac);-webkit-background-clip:text;color:transparent}
+#lg p{color:var(--mu);margin:8px 0 18px;max-width:300px}#lg .btn{max-width:320px}
 #ts{position:fixed;top:calc(12px + env(safe-area-inset-top));left:50%;transform:translateX(-50%);background:var(--tx);color:var(--bg);padding:10px 16px;border-radius:14px;font-weight:600;z-index:120;max-width:90%;display:none}
 .cf{position:fixed;z-index:130;pointer-events:none;animation:cf .9s ease-out forwards}
 @keyframes cf{to{transform:translate(var(--dx),var(--dy));opacity:0}}
@@ -64,6 +67,7 @@ input[type=color]{height:44px;padding:3px}
 <button id="fab" onclick="tab=='c'?openCourse():openTask()">+</button>
 <nav><button data-t="t" onclick="go('t')">📋 Tugas</button><button data-t="c" onclick="go('c')">🎨 Mata Kuliah</button><button data-t="s" onclick="go('s')">⚙️ Pengaturan</button></nav>
 <div id="sh"></div>
+<div id="lg"><h1>Jingga</h1><p>Masuk dengan Google supaya tugasmu tersinkron di semua perangkat.</p><button class="btn" onclick="loginG()">Masuk dengan Google</button><button class="btn g" onclick="skip()">Lanjut tanpa login</button></div>
 <script>
 const K='jingga.v1',$=s=>document.querySelector(s),uid=()=>Math.random().toString(36).slice(2,9);
 const esc=s=>String(s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
@@ -77,7 +81,10 @@ const TH={light:{bg:'#fff4f8',cd:'#ffffff',tx:'#473d63',a1:'#ff9fc5',a2:'#8fc3ff
 const lum=h=>{const n=parseInt(h.slice(1),16),f=v=>{v/=255;return v<=.03928?v/12.92:Math.pow((v+.055)/1.055,2.4)};return .2126*f(n>>16)+.7152*f(n>>8&255)+.0722*f(n&255)};
 
 let S;try{S=JSON.parse(localStorage.getItem(K))}catch(e){}
-if(!S||!S.courses)S={v:3,courses:DEF.map((d,i)=>({id:uid(),name:d[0],emoji:d[1],color:PAL[i]})),tasks:[]};
+let U=null;try{U=JSON.parse(localStorage.getItem('jingga.user'))}catch(e){}
+let sync='off';const SYN={off:'📴 lokal',ok:'☁️ tersinkron',wait:'⏳ menyinkronkan'};
+function setSync(x){sync=x;const e=$('#sy');if(e)e.textContent=SYN[x]}
+function reset(){S={v:3,courses:DEF.map((d,i)=>({id:uid(),name:d[0],emoji:d[1],color:PAL[i]})),tasks:[]};mig()}
 function mig(){
  S.tasks.forEach(t=>{if(!t.tipe){t.tipe=t.type=='Kelompok'?'Kelompok':'Individu';t.jenis=JENIS_DEF.includes(t.type)?t.type:''}});
  if(!S.theme)S.theme={mode:'light',custom:{...TH.light}};
@@ -86,8 +93,18 @@ function mig(){
  if(!S.col)S.col={};
  S.v=3;
 }
+if(!S||!S.courses)reset();
 mig();
-const save=()=>localStorage.setItem(K,JSON.stringify(S));
+
+/* ===== Penanda waktu ubah (untuk sinkronisasi) ===== */
+const hh=o=>{const c={...o};delete c.u;return JSON.stringify(c)};
+function stamp(){const n=Date.now();S.hs=S.hs||{};S.tomb=S.tomb||{};S.lh=S.lh||{};S.lu=S.lu||{};
+ ['tasks','courses'].forEach(k=>{const seen={};
+  S[k].forEach(i=>{const key=k+'/'+i.id;seen[key]=1;const h=hh(i);if(S.hs[key]!==h){S.hs[key]=h;i.u=n;delete S.tomb[key]}});
+  Object.keys(S.hs).forEach(key=>{if(key.startsWith(k+'/')&&!seen[key]){delete S.hs[key];S.tomb[key]=n}})});
+ const L={dosen:S.dosen,jenis:S.jenis};for(const k in L){const h=JSON.stringify(L[k]);if(S.lh[k]!==h){S.lh[k]=h;S.lu[k]=n}}}
+const save=()=>{stamp();localStorage.setItem(K,JSON.stringify(S));if(window.cloudPush)cloudPush()};
+
 function applyTheme(){
  const th=S.theme,r=document.documentElement.style;let c=th.mode=='custom'?{...th.custom}:TH[th.mode]||TH.light;
  if(th.mode=='custom')c.tx=lum(c.bg)>.4?'#3a3050':'#f3effa';
@@ -103,21 +120,24 @@ const rl=m=>(m%1440==0?'H-'+m/1440:m%60==0?m/60+' jam':m+' mnt')+(m%1440==0?'':'
 const crs=id=>S.courses.find(c=>c.id==id)||{name:'(Mata Kuliah dihapus)',emoji:'📌',color:'#bbb'};
 const sortedC=()=>[...S.courses].sort((a,b)=>cmp(a.name,b.name));
 const LD=()=>[...S.dosen].sort(cmp);
-function toast(m){const t=$('#ts');t.textContent=m;t.style.display='block';clearTimeout(toast.h);toast.h=setTimeout(()=>t.style.display='none',3500)}
+function toast(m){const t=$('#ts');t.textContent=m;t.style.display='block';clearTimeout(toast.h);toast.h=setTimeout(()=>t.style.display='none',4500)}
 function go(t){tab=t;render();scrollTo(0,0)}
+function loginG(){toast('Layanan login belum termuat. Cek internet lalu coba lagi.')}
+function logout(){}
+function skip(){S.skip=1;save();$('#lg').style.display='none'}
 
 /* ===== TAMPILAN TUGAS ===== */
 function card(t){const c=crs(t.cid),d=new Date(t.due),late=!t.done&&d<Date.now();
 return `<div class="card ${t.done?'done':''} ${late?'late':''}" style="--c:${c.color}"><button class="chk" onclick="tog('${t.id}',event)">${t.done?'✓':''}</button><div class="body" onclick="openTask('${t.id}')"><div class="mk">${c.emoji} ${esc(c.name)}</div><div class="tt">${esc(t.title)}</div><div class="dt">${esc(t.tipe)}${t.jenis?' • '+esc(t.jenis):''}</div><div class="dt">⏰ ${fmt(d)}${t.old?` (awal: ${fmt(new Date(t.old))})`:''}</div>${t.dosen?`<div class="dt">👩‍🏫 ${esc(t.dosen)}</div>`:''}</div><div class="ic">${t.link?`<button onclick="window.open('${esc(t.link)}','_blank')">🔗</button>`:''}<button onclick="gcal('${t.id}')">📅</button></div></div>`}
 const isCol=k=>S.col[k]===undefined?k=='done':S.col[k];
-function tg(k){S.col[k]=!isCol(k);save();render()}
+function tg(k){S.col[k]=!isCol(k);localStorage.setItem(K,JSON.stringify(S));render()}
 function vTasks(){const n=new Date(),eT=new Date(n);eT.setHours(23,59,59,999);const wk=+eT+6048e5;
 const g={late:[],today:[],week:[],later:[],done:[]};
 [...S.tasks].sort((a,b)=>new Date(a.due)-new Date(b.due)).forEach(t=>{const d=+new Date(t.due);
 if(t.done)g.done.unshift(t);else if(d<n)g.late.push(t);else if(d<=eT)g.today.push(t);else if(d<=wk)g.week.push(t);else g.later.push(t)});
 const L={late:'🔥 Terlambat',today:'📍 Hari ini',week:'📅 Minggu ini',later:'🌙 Nanti',done:'✅ Selesai'};
 const tot=S.tasks.length,p=tot?Math.round(g.done.length/tot*100):0,u=g.late.length+g.today.length;
-let h=`<div class="hd"><div><h2>Halo, Jingga 👋</h2><p>${tot-g.done.length} tugas belum selesai</p></div><div class="ring" style="--p:${p}%"><b>${p}%</b></div></div>`;
+let h=`<div class="hd"><div><h2>Halo${U?', '+esc(U.name.split(' ')[0]):''} 👋</h2><p>${tot-g.done.length} tugas belum selesai • <span id="sy">${SYN[sync]}</span></p></div><div class="ring" style="--p:${p}%"><b>${p}%</b></div></div>`;
 if(u)h+=`<div class="bn">⚡ ${u} tugas perlu perhatian hari ini</div>`;
 if(!tot)return h+`<div class="em">Belum ada tugas.<br>Ketuk tombol <b>+</b> untuk menambah tugas pertama.</div>`;
 for(const k in g)if(g[k].length){const c=isCol(k);h+=`<div class="gt" onclick="tg('${k}')"><span>${L[k]} (${g[k].length})</span><span class="ar">${c?'▸':'▾'}</span></div>`+(c?'':g[k].map(card).join(''))}
@@ -126,17 +146,18 @@ function vCourses(){return `<div class="hd"><div><h2>Mata Kuliah</h2><p>Semangat
 function vSet(){const np=window.Notification?Notification.permission:'tidak didukung',m=S.theme.mode,cu=S.theme.custom;
 const pk=(k,l)=>`<div><label>${l}</label><input type="color" value="${cu[k]}" oninput="setC('${k}',this.value)"></div>`;
 return `<div class="hd"><div><h2>Pengaturan</h2></div></div>
-<div class="set"><b>🎨 Tema</b><div class="chs" style="margin-top:8px">${[['light','☀️ Terang'],['dark','🌙 Gelap'],['custom','🎛️ Custom']].map(a=>`<button class="ch ${m==a[0]?'on':''}" onclick="setTheme('${a[0]}')">${a[1]}</button>`).join('')}</div>${m=='custom'?`<div class="g2" style="margin-top:6px">${pk('bg','Warna latar')}${pk('cd','Warna kartu')}${pk('a1','Aksen 1')}${pk('a2','Aksen 2')}</div>`:''}</div>
+<div class="set"><b>👤 Akun & Sinkronisasi</b><p>${U?esc(U.name)+' ('+esc(U.email)+')<br>Data tersinkron otomatis ke semua perangkat yang login dengan akun ini.':'Belum masuk. Data hanya tersimpan di HP ini.'}</p>${U?'<button class="btn g" style="margin-top:0" onclick="logout()">Keluar</button>':'<button class="btn" style="margin-top:0" onclick="loginG()">Masuk dengan Google</button>'}</div>
+<div class="set"><b>🎨 Tema</b><p>Tema disimpan per perangkat.</p><div class="chs">${[['light','☀️ Terang'],['dark','🌙 Gelap'],['custom','🎛️ Custom']].map(a=>`<button class="ch ${m==a[0]?'on':''}" onclick="setTheme('${a[0]}')">${a[1]}</button>`).join('')}</div>${m=='custom'?`<div class="g2" style="margin-top:6px">${pk('bg','Warna latar')}${pk('cd','Warna kartu')}${pk('a1','Aksen 1')}${pk('a2','Aksen 2')}</div>`:''}</div>
 <div class="set"><b>🗂️ Kelola Daftar</b><p>Tambah, ubah nama, atau hapus pilihan di dropdown.</p><button class="btn g" style="margin-top:0" onclick="manage('c','closeS()')">Mata Kuliah</button><button class="btn g" onclick="manage('dosen','closeS()')">Dosen</button><button class="btn g" onclick="manage('jenis','closeS()')">Jenis Tugas</button></div>
 <div class="set"><b>🔔 Notifikasi</b><p>Status: ${np}. Pengingat berbunyi saat aplikasi aktif/baru dibuka. Untuk tugas penting, pakai tombol 📅 (Google Calendar) agar pasti berbunyi.</p><button class="btn g" onclick="askN()">Izinkan notifikasi</button></div>
-<div class="set"><b>💾 Backup</b><p>Simpan file backup ke Google Drive/WA. Dipakai kalau ganti HP.</p><button class="btn" onclick="exp()">Simpan backup</button><button class="btn g" onclick="$('#im').click()">Pulihkan dari file</button><input type="file" id="im" accept=".json" hidden onchange="imp(event)"></div>
+<div class="set"><b>💾 Backup</b><p>Simpan file backup ke Google Drive/WA sebagai cadangan tambahan.</p><button class="btn" onclick="exp()">Simpan backup</button><button class="btn g" onclick="$('#im').click()">Pulihkan dari file</button><input type="file" id="im" accept=".json" hidden onchange="imp(event)"></div>
 <div class="set"><b>🔋 Tips Samsung</b><p>Pengaturan HP → Aplikasi → Jingga → Baterai → pilih "Tidak dibatasi".</p></div>
-<div class="set"><button class="btn r" style="margin-top:0" onclick="if(confirm('Hapus SEMUA data?')){localStorage.removeItem(K);location.reload()}">Hapus semua data</button></div>`}
-function setTheme(m){if(m=='custom'&&!S.theme.touched)S.theme.custom={...(TH[S.theme.mode]||TH.light)};S.theme.mode=m;save();applyTheme();render()}
-function setC(k,v){S.theme.custom[k]=v;S.theme.touched=1;save();applyTheme()}
+<div class="set"><p>Menghapus data di perangkat ini tidak menghapus data di akun cloud.</p><button class="btn r" style="margin-top:0" onclick="if(confirm('Hapus data di perangkat ini?')){localStorage.removeItem(K);location.reload()}">Hapus data di perangkat ini</button></div>`}
+function setTheme(m){if(m=='custom'&&!S.theme.touched)S.theme.custom={...(TH[S.theme.mode]||TH.light)};S.theme.mode=m;localStorage.setItem(K,JSON.stringify(S));applyTheme();render()}
+function setC(k,v){S.theme.custom[k]=v;S.theme.touched=1;localStorage.setItem(K,JSON.stringify(S));applyTheme()}
 function render(){$('#app').innerHTML=tab=='t'?vTasks():tab=='c'?vCourses():vSet();document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('on',b.dataset.t==tab));$('#fab').style.display=tab=='s'?'none':''}
 
-/* ===== PANEL (dengan tombol silang ✕) ===== */
+/* ===== PANEL (dengan tombol silang) ===== */
 function sheet(title,h,back){const o=$('#sh');if(o.className!='open')history.pushState({s:1},'');
  o.innerHTML=`<div class="bd" onclick="closeS()"></div><div class="pn"><div class="sh-h"><h3>${title}</h3><button class="x" onclick="${back||'closeS()'}">✕</button></div>${h}</div>`;o.className='open'}
 function closeS(){const o=$('#sh');if(o.className!='open')return;o.className='';if(history.state&&history.state.s)history.back()}
@@ -179,7 +200,7 @@ if(F.id){const t=S.tasks.find(x=>x.id==F.id);if(t.due!=o.due){t.old=t.old||t.due
 save();closeS();render();check()}
 function delTask(id){if(confirm('Hapus tugas ini?')){S.tasks=S.tasks.filter(x=>x.id!=id);save();closeS();render()}}
 
-/* ===== KELOLA DAFTAR (Mata Kuliah / Dosen / Jenis Tugas) ===== */
+/* ===== KELOLA DAFTAR ===== */
 const keys=k=>k=='c'?sortedC().map(c=>c.id):k=='dosen'?LD():S.jenis;
 const lab=(k,x)=>k=='c'?crs(x).emoji+' '+crs(x).name:x;
 function addItem(k,n){if(k=='c'){const id=uid();S.courses.push({id,name:n,emoji:'📘',color:PAL[S.courses.length%PAL.length]});return id}
@@ -207,7 +228,7 @@ function delCourse(id){if(S.tasks.some(t=>t.cid==id))return toast('Mata Kuliah i
 function gcal(id){const t=S.tasks.find(x=>x.id==id),c=crs(t.cid),s=new Date(t.due),e=new Date(+s+18e5),z=d=>d.toISOString().replace(/[-:]|\.\d+/g,'');
 window.open('https://calendar.google.com/calendar/render?action=TEMPLATE&text='+encodeURIComponent(c.emoji+' '+t.title)+'&dates='+z(s)+'/'+z(e)+'&details='+encodeURIComponent(c.name+(t.dosen?'\n'+t.dosen:'')+(t.link?'\n'+t.link:'')),'_blank')}
 function exp(){const b=new Blob([JSON.stringify(S)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='jingga-backup-'+new Date().toISOString().slice(0,10)+'.json';a.click();toast('Backup disimpan ✅')}
-function imp(e){const f=e.target.files[0];if(!f)return;f.text().then(x=>{try{const d=JSON.parse(x);if(!d.courses||!d.tasks)throw 0;if(!confirm('Ganti semua data dengan backup ini?'))return;S=d;mig();save();applyTheme();render();toast('Data dipulihkan ✅')}catch(_){toast('File backup tidak valid')}})}
+function imp(e){const f=e.target.files[0];if(!f)return;f.text().then(x=>{try{const d=JSON.parse(x);if(!d.courses||!d.tasks)throw 0;if(!confirm('Ganti semua data dengan backup ini?'))return;const c=S.cloud;S=d;S.cloud=c;S.hs={};S.tomb={};S.lh={};S.lu={};mig();save();applyTheme();render();toast('Data dipulihkan ✅')}catch(_){toast('File backup tidak valid')}})}
 function askN(){if(!window.Notification)return toast('Browser tidak mendukung notifikasi');Notification.requestPermission().then(()=>render())}
 async function ntf(t,b){toast(t+' — '+b);if(window.Notification&&Notification.permission=='granted'){try{const r=await navigator.serviceWorker.ready;r.showNotification(t,{body:b,icon:'icon-192.png',badge:'icon-192.png',tag:t})}catch(_){}}}
 function check(){const n=Date.now();let ch=0;S.tasks.forEach(t=>{if(t.done)return;t.fired=t.fired||[];const due=+new Date(t.due);t.rem.forEach(r=>{if(n>=due-r*6e4&&!t.fired.includes(r)&&n<due+216e5){t.fired.push(r);ch=1;ntf('⏰ '+crs(t.cid).name,t.title+' ('+rl(r)+') — '+fmt(new Date(due)))}})});if(ch){save();render()}}
@@ -215,4 +236,62 @@ save();render();setTimeout(()=>{$('#sp').style.opacity=0;setTimeout(()=>$('#sp')
 setInterval(check,3e4);document.addEventListener('visibilitychange',()=>{if(!document.hidden){check();render()}});setTimeout(check,2500);
 if(navigator.storage&&navigator.storage.persist)navigator.storage.persist();
 if('serviceWorker'in navigator)navigator.serviceWorker.register('sw.js');
-</script></body></html>
+</script>
+
+<script type="module">
+import{initializeApp}from"https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
+import{getAuth,onAuthStateChanged,signInWithPopup,GoogleAuthProvider,signOut}from"https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
+import{getDatabase,ref,onValue,update}from"https://www.gstatic.com/firebasejs/10.14.1/firebase-database.js";
+
+const app=initializeApp({apiKey:"AIzaSyAt1aH48MQ5jK0vJJs0BYZsZ3gdpL9oxAQ",authDomain:"jingga-app.firebaseapp.com",databaseURL:"https://jingga-app-default-rtdb.asia-southeast1.firebasedatabase.app",projectId:"jingga-app",appId:"1:110476300573:web:8edf3ea74a0de3878a91f4"});
+const auth=getAuth(app),db=getDatabase(app);
+let me=null,unsub=null,tm=null,rm={},ready=false;
+const clean=o=>JSON.parse(JSON.stringify(o));
+const pristine=()=>S.tasks.length==0&&S.courses.every(c=>DEF.some(d=>d[0]==c.name&&d[1]==c.emoji));
+
+/* Gabungkan data dari cloud ke HP (yang lebih baru menang) */
+function apply(r){stamp();let ch=0;
+ ['tasks','courses'].forEach(k=>{const m=r[k]||{};
+  for(const id in m){const ri=m[id],key=k+'/'+id,li=S[k].find(i=>i.id==id),lu=li?(li.u||0):(S.tomb[key]||0);
+   if((ri.u||0)>lu){ch=1;S[k]=S[k].filter(i=>i.id!=id);
+    if(ri.x){S.tomb[key]=ri.u;delete S.hs[key]}
+    else{const n={...ri,id};if(k=='tasks'){n.rem=n.rem||[];n.fired=n.fired||[]}S[k].push(n);delete S.tomb[key];S.hs[key]=hh(n)}}}});
+ const L=r.lists||{};
+ ['dosen','jenis'].forEach(k=>{const x=L[k];if(x&&(x.u||0)>(S.lu[k]||0)){S[k]=x.a||[];S.lh[k]=JSON.stringify(S[k]);S.lu[k]=x.u;ch=1}});
+ if(ch){localStorage.setItem(K,JSON.stringify(S));render()}}
+
+/* Kirim perubahan HP ke cloud */
+async function push(){if(!me||!ready)return;const u={};
+ ['tasks','courses'].forEach(k=>{const m=rm[k]||{};
+  S[k].forEach(i=>{if(!m[i.id]||(i.u||0)>(m[i.id].u||0))u[k+'/'+i.id]=clean(i)});
+  Object.keys(S.tomb).forEach(key=>{if(!key.startsWith(k+'/'))return;const id=key.slice(k.length+1),t=S.tomb[key];if(!m[id]||t>(m[id].u||0))u[key]={x:1,u:t}})});
+ ['dosen','jenis'].forEach(k=>{const x=(rm.lists||{})[k];if(!x||(S.lu[k]||0)>(x.u||0))u['lists/'+k]={a:S[k],u:S.lu[k]||1}});
+ if(!Object.keys(u).length){setSync('ok');return}
+ setSync('wait');
+ try{await update(ref(db,'users/'+me),u);setSync('ok')}catch(e){setSync('wait')}}
+
+window.cloudPush=()=>{if(!me||!ready)return;setSync('wait');clearTimeout(tm);tm=setTimeout(push,500)};
+addEventListener('online',()=>push());
+
+function listen(){unsub&&unsub();ready=false;
+ unsub=onValue(ref(db,'users/'+me),s=>{rm=s.val()||{};
+  if(S.cloud!=me){ /* pertama kali akun ini dipakai di perangkat ini */
+   if(rm.courses&&pristine()){S.courses=[];S.tasks=[];S.dosen=[];S.jenis=[];S.hs={};S.tomb={};S.lh={dosen:'[]',jenis:'[]'};S.lu={}}
+   S.cloud=me}
+  ready=true;apply(rm);push()},
+ e=>{setSync('off');toast(e.code=='PERMISSION_DENIED'?'Aturan database belum dipasang di Firebase.':'Sinkronisasi gagal: '+e.code)})}
+
+onAuthStateChanged(auth,user=>{
+ if(!user){me=null;ready=false;unsub&&unsub();unsub=null;rm={};U=null;localStorage.removeItem('jingga.user');setSync('off');
+  $('#lg').style.display=(!S.skip&&!S.cloud)?'flex':'none';render();return}
+ if(S.cloud&&S.cloud!=user.uid){reset();save()} /* akun berbeda di perangkat yang sama */
+ me=user.uid;U={name:user.displayName||'Teman',email:user.email||''};
+ localStorage.setItem('jingga.user',JSON.stringify(U));
+ $('#lg').style.display='none';setSync('wait');render();listen()});
+
+window.loginG=async()=>{try{await signInWithPopup(auth,new GoogleAuthProvider())}catch(e){
+ if(e.code=='auth/popup-closed-by-user'||e.code=='auth/cancelled-popup-request')return;
+ toast(e.code=='auth/unauthorized-domain'?'Domain belum didaftarkan: Firebase → Authentication → Settings → Authorized domains.':'Login gagal: '+(e.code||e.message))}};
+window.logout=async()=>{if(confirm('Keluar dari akun? Data di HP ini tetap tersimpan.'))await signOut(auth)};
+</script>
+</body></html>
