@@ -77,6 +77,21 @@ const JENIS_DEF=['Makalah','PPT','Makalah & PPT','UTS/UAS','Resume','Proyek','LK
 const PAL=['#f9a8c9','#c4b5fd','#a5c8ff','#ffc9a8','#9fe3d0','#f4b6e6','#fbe38e','#b6e3ff','#b8e0a8'];
 const DEF=[['Patient Safety','🛡️'],['Metodologi Penelitian','📖'],['Biostatistik','📊'],['PKKB','🚑'],['Promosi Kesehatan','🌱'],['Evidence Based Nursing','📚'],['Keperawatan Komunitas','🏘️'],['Interprofesional Education','🤝'],['Praktikum Komunitas','🩺']];
 const LBL={c:'Mata Kuliah',dosen:'Dosen',jenis:'Jenis Tugas'};
+ 
+ /* Daftar dosen awal (masuk sekali saat pertama pakai). Selanjutnya ubah/tambah lewat Pengaturan → Kelola Daftar */
+const DOSEN_AWAL=[
+"Dr. Adin Mu'afiro, S.ST., Ns., M.Kes",
+"Ach. Arfan Adinata, S.Kep., Ns., M.Kep",
+"Endah",
+"Endang Soelistyowati",
+"Hepta Anugrahini, Ns., M.Kep.",
+"Dr. Joko Suwito, S.Kp., M.Kes",
+"Nur Hasanah, SKM., M.Kes",
+"Purwanti Nurfita",
+"Dr. Sri Utami, S.Kp., M.Kes.",
+"Supriyanto",
+"Dr. Yessy Desy Arna, Ns., M.Kep., Sp.Kom"
+];
 const TH={light:{bg:'#fff4f8',cd:'#ffffff',tx:'#473d63',a1:'#ff9fc5',a2:'#8fc3ff'},dark:{bg:'#15121f',cd:'#221e33',tx:'#f3effa',a1:'#f7a8d0',a2:'#8cbcff'}};
 const lum=h=>{const n=parseInt(h.slice(1),16),f=v=>{v/=255;return v<=.03928?v/12.92:Math.pow((v+.055)/1.055,2.4)};return .2126*f(n>>16)+.7152*f(n>>8&255)+.0722*f(n&255)};
 
@@ -89,6 +104,7 @@ function mig(){
  S.tasks.forEach(t=>{if(!t.tipe){t.tipe=t.type=='Kelompok'?'Kelompok':'Individu';t.jenis=JENIS_DEF.includes(t.type)?t.type:''}});
  if(!S.theme)S.theme={mode:'light',custom:{...TH.light}};
  if(!S.dosen){S.dosen=S.dosenExtra||[];delete S.dosenExtra}
+ if(!S.dsd){DOSEN_AWAL.forEach(n=>{if(!S.dosen.includes(n))S.dosen.push(n)});S.dsd=1}
  if(!S.jenis)S.jenis=[...JENIS_DEF];
  if(!S.col)S.col={};
  S.v=3;
