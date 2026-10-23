@@ -12,7 +12,7 @@
 body{background:radial-gradient(circle at 85% -5%,color-mix(in srgb,var(--a1) 35%,transparent),transparent 45%),radial-gradient(circle at 0 30%,color-mix(in srgb,var(--a2) 30%,transparent),transparent 40%),var(--bg);background-attachment:fixed;color:var(--tx);font:15px/1.4 system-ui,sans-serif;min-height:100vh;padding:env(safe-area-inset-top) 0 100px}
 button,input,select,textarea{font:inherit;color:inherit}
 #sp{position:fixed;inset:0;z-index:99;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;transition:opacity .6s}
-#sp h1{font-size:68px;font-weight:800;letter-spacing:-2px;background:linear-gradient(90deg,var(--a1),var(--a2),var(--a1));background-size:300%;-webkit-background-clip:text;color:transparent;animation:fl 2s ease both}
+#sp h1{font-size:clamp(36px,11vw,64px);text-align:center;padding:0 16px;font-weight:800;letter-spacing:-1px;background:linear-gradient(90deg,var(--a1),var(--a2),var(--a1));background-size:300%;-webkit-background-clip:text;color:transparent;animation:fl 2s ease both} 
 #sp p{color:var(--mu);margin-top:6px;animation:fl 2s .3s ease both}
 @keyframes fl{0%{opacity:0;transform:scale(.8);background-position:0}60%{opacity:1}100%{opacity:1;transform:none;background-position:100%}}
 .wrap{padding:18px 16px;max-width:560px;margin:auto}
@@ -61,8 +61,9 @@ input[type=color]{height:44px;padding:3px}
 .cf{position:fixed;z-index:130;pointer-events:none;animation:cf .9s ease-out forwards}
 @keyframes cf{to{transform:translate(var(--dx),var(--dy));opacity:0}}
 @media(prefers-reduced-motion:reduce){*{animation:none!important}}
+.ft{text-align:center;font-size:12px;opacity:.35;padding:14px 0 6px;letter-spacing:.3px} 
 </style></head><body>
-<div id="sp"><h1>Jingga</h1><p>tugas rapi, hati tenang ✨</p></div>
+<div id="sp"><h1>Tugas Princess</h1><p>tugas rapi, hati tenang ✨</p></div> 
 <div id="ts"></div><div class="wrap" id="app"></div>
 <button id="fab" onclick="tab=='c'?openCourse():openTask()">+</button>
 <nav><button data-t="t" onclick="go('t')">📋 Tugas</button><button data-t="c" onclick="go('c')">🎨 Mata Kuliah</button><button data-t="s" onclick="go('s')">⚙️ Pengaturan</button></nav>
@@ -75,7 +76,7 @@ const cmp=(a,b)=>a.localeCompare(b,'id');
 const TIPE=['Individu','Kelompok'];
 const JENIS_DEF=['Makalah','PPT','Makalah & PPT','UTS/UAS','Resume','Proyek','LKS'];
 const PAL=['#f9a8c9','#c4b5fd','#a5c8ff','#ffc9a8','#9fe3d0','#f4b6e6','#fbe38e','#b6e3ff','#b8e0a8'];
-const DEF=[['Patient Safety','🛡️'],['Metodologi Penelitian','📖'],['Biostatistik','📊'],['PKKB','🚑'],['Promosi Kesehatan','🌱'],['Evidence Based Nursing','📚'],['Keperawatan Komunitas','🏘️'],['Interprofesional Education','🤝'],['Praktikum Komunitas','🩺']];
+const DEF=[[' Management Patient Safety','🛡️'],['Metodologi Penelitian','📖'],['Biostatistik','📊'],['PKKB','🚑'],['Promosi Kesehatan','🌱'],['Evidence Based Nursing','📚'],['Keperawatan Komunitas','🏘️'],['Interprofesional Education','🤝'],['Praktikum Komunitas','🩺']];
 const LBL={c:'Mata Kuliah',dosen:'Dosen',jenis:'Jenis Tugas'};
  
  /* Daftar dosen awal (masuk sekali saat pertama pakai). Selanjutnya ubah/tambah lewat Pengaturan → Kelola Daftar */
@@ -167,8 +168,9 @@ return `<div class="hd"><div><h2>Pengaturan</h2></div></div>
 <div class="set"><b>🗂️ Kelola Daftar</b><p>Tambah, ubah nama, atau hapus pilihan di dropdown.</p><button class="btn g" style="margin-top:0" onclick="manage('c','closeS()')">Mata Kuliah</button><button class="btn g" onclick="manage('dosen','closeS()')">Dosen</button><button class="btn g" onclick="manage('jenis','closeS()')">Jenis Tugas</button></div>
 <div class="set"><b>🔔 Notifikasi</b><p>Status: ${np}. Pengingat berbunyi saat aplikasi aktif/baru dibuka. Untuk tugas penting, pakai tombol 📅 (Google Calendar) agar pasti berbunyi.</p><button class="btn g" onclick="askN()">Izinkan notifikasi</button></div>
 <div class="set"><b>💾 Backup</b><p>Simpan file backup ke Google Drive/WA sebagai cadangan tambahan.</p><button class="btn" onclick="exp()">Simpan backup</button><button class="btn g" onclick="$('#im').click()">Pulihkan dari file</button><input type="file" id="im" accept=".json" hidden onchange="imp(event)"></div>
-<div class="set"><b>🔋 Tips Samsung</b><p>Pengaturan HP → Aplikasi → Jingga → Baterai → pilih "Tidak dibatasi".</p></div>
-<div class="set"><p>Menghapus data di perangkat ini tidak menghapus data di akun cloud.</p><button class="btn r" style="margin-top:0" onclick="if(confirm('Hapus data di perangkat ini?')){localStorage.removeItem(K);location.reload()}">Hapus data di perangkat ini</button></div>`}
+<div class="set"><b>🔋 Tips agar selalu ternotifikasi</b><p>1. Tekan "Izinkan notifikasi" di atas.<br>2. Pengaturan HP → Aplikasi → Jingga → Baterai → pilih "Tidak dibatasi".<br>3. Samsung: Perawatan perangkat → Baterai → Batas penggunaan di latar belakang → keluarkan Jingga dari "Aplikasi tidur" (nama menu bisa sedikit beda di tiap versi).<br>4. Buka aplikasi minimal sekali sehari.<br>5. Untuk tugas penting, pakai tombol 📅 supaya Google Calendar yang membunyikan alarmnya.</p></div>
+<div class="set"><p>Menghapus data di perangkat ini tidak menghapus data di akun cloud.</p><button class="btn r" style="margin-top:0" onclick="if(confirm('Hapus data di perangkat ini?')){localStorage.removeItem(K);location.reload()}">Hapus data di perangkat ini</button></div>
+<div class="ft">© @athalahfz & @marethapuspitaa</div>`}
 function setTheme(m){if(m=='custom'&&!S.theme.touched)S.theme.custom={...(TH[S.theme.mode]||TH.light)};S.theme.mode=m;localStorage.setItem(K,JSON.stringify(S));applyTheme();render()}
 function setC(k,v){S.theme.custom[k]=v;S.theme.touched=1;localStorage.setItem(K,JSON.stringify(S));applyTheme()}
 function render(){$('#app').innerHTML=tab=='t'?vTasks():tab=='c'?vCourses():vSet();document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('on',b.dataset.t==tab));$('#fab').style.display=tab=='s'?'none':''}
